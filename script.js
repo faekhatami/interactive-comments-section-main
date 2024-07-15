@@ -67,3 +67,7 @@ document.addEventListener("click", (event) => {
     scoreSpan.textContent = parseInt(scoreSpan.textContent) - 1;
   }
 });
+
+localStorage.setItem("comments", JSON.stringify(data));
+
+const savedComments = JSON.parse(localStorage.getItem("comments"));
