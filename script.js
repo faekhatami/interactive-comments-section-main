@@ -42,7 +42,7 @@ function createReplyElement(reply) {
   replyDiv.innerHTML = `
       <div class="user">
         <img src="${reply.user.image.png}" alt="${reply.user.username}">
-          <strong>${reply.user.usrname}</strong> • ${reply.createdAt} • replying to ${reply.replyingTo}
+          <strong>${reply.user.username}</strong> • ${reply.createdAt} • replying to ${reply.replyingTo}
       </div>
       <p>${reply.content}</p>
       <div class="actions">
@@ -62,7 +62,7 @@ document.addEventListener("click", (event) => {
   if (event.target.classList.contains("upvote")) {
     const scoreSpan = event.target.nextElementSibling;
     scoreSpan.textContent = parseInt(scoreSpan.textContent) + 1;
-  } else if (event.target.classList.contians("downvote")) {
+  } else if (event.target.classList.contains("downvote")) {
     const scoreSpan = event.target.previousElementSibling;
     scoreSpan.textContent = parseInt(scoreSpan.textContent) - 1;
   }
