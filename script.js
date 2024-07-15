@@ -57,3 +57,13 @@ function createReplyElement(reply) {
 
   return replyDiv;
 }
+
+document.addEventListener("click", (event) => {
+  if (event.target.classList.contains("upvote")) {
+    const scoreSpan = event.target.nextElementSibling;
+    scoreSpan.textContent = parseInt(scoreSpan.textContent) + 1;
+  } else if (event.target.classList.contians("downvote")) {
+    const scoreSpan = event.target.previousElementSibling;
+    scoreSpan.textContent = parseInt(scoreSpan.textContent) - 1;
+  }
+});
