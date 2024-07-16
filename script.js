@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (data) {
     renderComments(data);
   }
+
+  document.addEventListener("click", handleButtonClick);
 });
 
 function renderComments(data) {
@@ -30,6 +32,9 @@ function renderComments(data) {
       commentsContainer.appendChild(createReplyElement(reply));
     });
   });
+
+  // Add comment input box at the end
+  commentsContainer.appendChild(createCommentInputBox());
 }
 
 function createCommentElement(comment) {
@@ -48,7 +53,7 @@ function createCommentElement(comment) {
         <span>${comment.score}</span>
         <button class="downvote">-</button>
       </div>
-      <button class="reply">Reply</button>
+      <button class="reply" data-id="${comment.id}">Reply</button>
     </div>
   `;
 
@@ -71,19 +76,100 @@ function createReplyElement(reply) {
         <span>${reply.score}</span>
         <button class="downvote">-</button>
       </div>
-      <button class="reply">Reply</button>
+      <button class="reply" data-id="${reply.id}">Reply</button>
     </div>
   `;
 
   return replyDiv;
 }
 
-document.addEventListener("click", (event) => {
+function createCommentInputBox() {
+  const commentInputDiv = document.createElement("div");
+  commentInputDiv.classList.add("comment-input");
+
+  commentInputDiv.innerHTML = `
+    <textarea id="new-comment-content" placeholder="Add a comment..."></textarea>
+    <button id="send-comment">Send</button>
+  `;
+
+  return commentInputDiv;
+}
+
+function handleButtonClick(event) {
   if (event.target.classList.contains("upvote")) {
     const scoreSpan = event.target.nextElementSibling;
     scoreSpan.textContent = parseInt(scoreSpan.textContent) + 1;
   } else if (event.target.classList.contains("downvote")) {
     const scoreSpan = event.target.previousElementSibling;
     scoreSpan.textContent = parseInt(scoreSpan.textContent) - 1;
+  } else if (event.target.id === "send-comment") {
+    const newCommentContent = document.getElementById(
+      "new-comment-content"
+    ).value;
+    if (newCommentContent.trim() !== "") {
+      addNewComment(newCommentContent);
+    }
+  } else if (event.target.classList.contains("reply")) {
+    const commentId = event.target.getAttribute("data-id");
+    addReplyInputBox(commentId);
   }
-});
+}
+
+function addNewComment(content) {
+  const data = JSON.parse(localStorage.getItem("comments"));
+  const newComment = {
+    id: Date.now(),
+    content: content,
+    createdAt: "Just now",
+    score: 0,
+    user: data.currentUser,
+    replies: [],
+  };
+  data.comments.push(newComment);
+  localStorage.setItem("comments", JSON.stringify(data));
+  renderComments(data);
+}
+
+function addReplyInputBox(commentId) {
+  const commentDiv = document
+    .querySelector(`button[data-id="${commentId}"]`)
+    .closest(".comment, .reply");
+  const replyInputBox = document.createElement("div");
+  replyInputBox.classList.add("reply-input");
+
+  replyInputBox.innerHTML = `
+    <textarea class="reply-content" placeholder="Add a reply..."></textarea>
+    <button class="send-reply" data-id="${commentId}">Send</button>
+  `;
+
+  commentDiv.appendChild(replyInputBox);
+
+  document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("send-reply")) {
+      const replyContent = event.target.previousElementSibling.value;
+      if (replyContent.trim() !== "") {
+        addNewReply(commentId, replyContent);
+      }
+    }
+  });
+}
+
+function addNewReply(commentId, content) {
+  const data = JSON.parse(localStorage.getItem("comments"));
+  const newReply = {
+    id: Date.now(),
+    content: content,
+    createdAt: "Just now",
+    score: 0,
+    replyingTo: data.comments.find(
+      (comment) => comment.id === parseInt(commentId)
+    ).user.username,
+    user: data.currentUser,
+  };
+  const comment = data.comments.find(
+    (comment) => comment.id === parseInt(commentId)
+  );
+  comment.replies.push(newReply);
+  localStorage.setItem("comments", JSON.stringify(data));
+  renderComments(data);
+}
